@@ -1,0 +1,282 @@
+<?xml version="1.0"?>
+<Devices>
+	<!-- ================================================= connection -->
+	<Device type="custom" id="nleConnection">
+		<Name>NLE Connection</Name>
+		<ConfigUI>
+			<Field id="connectionType" type="menu" defaultValue="selfhosted">
+				<Label>Connection type:</Label>
+				<List>
+					<Option value="selfhosted">Self-hosted NLE server (Docker / HA add-on)</Option>
+					<Option value="embedded">Embedded server (runs inside this plugin)</Option>
+					<Option value="hosted">nolongerevil.com (cloud)</Option>
+				</List>
+			</Field>
+			<Field id="sep0" type="separator"/>
+
+			<!-- self-hosted -->
+			<Field id="shHelp" type="label" fontSize="small" visibleBindingId="connectionType" visibleBindingValue="selfhosted">
+				<Label>The server's CONTROL port (8082 for the Docker image). Not the thermostat port (8000).</Label>
+			</Field>
+			<Field id="serverUrl" type="textfield" defaultValue="http://127.0.0.1:8082" visibleBindingId="connectionType" visibleBindingValue="selfhosted">
+				<Label>Control API URL:</Label>
+			</Field>
+			<Field id="dbPath" type="textfield" defaultValue="" visibleBindingId="connectionType" visibleBindingValue="selfhosted">
+				<Label>Server database file:</Label>
+			</Field>
+			<Field id="dbHelp" type="label" fontSize="small" visibleBindingId="connectionType" visibleBindingValue="selfhosted">
+				<Label>Optional. The path on this Mac to the container's database.sqlite (bind-mount its data folder - see README). Enables hot water states and Heat Link captures, which the Docker API can't provide.</Label>
+			</Field>
+			<Field id="safetyPollMinutes" type="textfield" defaultValue="5" visibleBindingId="connectionType" visibleBindingValue="selfhosted,embedded">
+				<Label>Safety poll (minutes):</Label>
+			</Field>
+			<Field id="pollHelp" type="label" fontSize="small" visibleBindingId="connectionType" visibleBindingValue="selfhosted,embedded">
+				<Label>Updates arrive instantly over the server's event stream; this poll only catches anything missed.</Label>
+			</Field>
+
+			<!-- embedded -->
+			<Field id="embHelp" type="label" fontSize="small" visibleBindingId="connectionType" visibleBindingValue="embedded">
+				<Label>Runs the NoLongerEvil server inside Indigo - no Docker needed. When flashing, pick "Self-Hosted (NLE Server)" in the installer and enter http://THIS-MAC-IP:device-port. Only one embedded connection is allowed. Port and address changes need a plugin restart.</Label>
+			</Field>
+			<Field id="apiOriginIp" type="textfield" defaultValue="" visibleBindingId="connectionType" visibleBindingValue="embedded">
+				<Label>This Mac's LAN IP:</Label>
+			</Field>
+			<Field id="ipHelp" type="label" fontSize="small" visibleBindingId="connectionType" visibleBindingValue="embedded">
+				<Label>Leave blank to detect automatically. Must be an IP, not a hostname - the thermostat can't resolve .local names.</Label>
+			</Field>
+			<Field id="devicePort" type="textfield" defaultValue="9543" visibleBindingId="connectionType" visibleBindingValue="embedded">
+				<Label>Thermostat port:</Label>
+			</Field>
+			<Field id="controlPort" type="textfield" defaultValue="9544" visibleBindingId="connectionType" visibleBindingValue="embedded">
+				<Label>Control port:</Label>
+			</Field>
+			<Field id="controlLan" type="checkbox" defaultValue="false" visibleBindingId="connectionType" visibleBindingValue="embedded">
+				<Label>Dashboard on LAN:</Label>
+				<Description>Expose the NLE web dashboard (no password!) on the LAN</Description>
+			</Field>
+			<Field id="serverLogLevel" type="menu" defaultValue="30" visibleBindingId="connectionType" visibleBindingValue="embedded">
+				<Label>Server log level:</Label>
+				<List>
+					<Option value="30">Warnings and errors</Option>
+					<Option value="20">Info</Option>
+					<Option value="10">Debug (very chatty)</Option>
+				</List>
+			</Field>
+
+			<!-- hosted -->
+			<Field id="hostedHelp" type="label" fontSize="small" visibleBindingId="connectionType" visibleBindingValue="hosted">
+				<Label>Create a key at nolongerevil.com/settings → API Keys with read and write scopes. The cloud API allows 20 requests a minute and has no push, so it is polled.</Label>
+			</Field>
+			<Field id="apiKey" type="textfield" defaultValue="" secure="true" visibleBindingId="connectionType" visibleBindingValue="hosted">
+				<Label>API key (nle_...):</Label>
+			</Field>
+			<Field id="pollSeconds" type="textfield" defaultValue="120" visibleBindingId="connectionType" visibleBindingValue="hosted">
+				<Label>Poll every (seconds):</Label>
+			</Field>
+			<Field id="hostedBaseUrl" type="textfield" defaultValue="https://nolongerevil.com/api/v1" visibleBindingId="connectionType" visibleBindingValue="hosted">
+				<Label>API base URL:</Label>
+			</Field>
+			<Field id="baseHelp" type="label" fontSize="small" visibleBindingId="connectionType" visibleBindingValue="hosted">
+				<Label>Leave as is. Only change it to point at tools/mock_hosted_api.py for testing.</Label>
+			</Field>
+		</ConfigUI>
+		<States>
+			<State id="status">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Status</TriggerLabel>
+				<ControlPageLabel>Status</ControlPageLabel>
+			</State>
+			<State id="connected">
+				<ValueType>Boolean</ValueType>
+				<TriggerLabel>Connected</TriggerLabel>
+				<ControlPageLabel>Connected</ControlPageLabel>
+			</State>
+			<State id="thermostatCount">
+				<ValueType>Integer</ValueType>
+				<TriggerLabel>Thermostats on server</TriggerLabel>
+				<ControlPageLabel>Thermostats on server</ControlPageLabel>
+			</State>
+			<State id="eventStream">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Event stream</TriggerLabel>
+				<ControlPageLabel>Event stream</ControlPageLabel>
+			</State>
+			<State id="lastUpdate">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Last update</TriggerLabel>
+				<ControlPageLabel>Last update</ControlPageLabel>
+			</State>
+			<State id="lastError">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Last error</TriggerLabel>
+				<ControlPageLabel>Last error</ControlPageLabel>
+			</State>
+		</States>
+		<UiDisplayStateId>status</UiDisplayStateId>
+	</Device>
+
+	<!-- ================================================= thermostat -->
+	<Device type="thermostat" id="nestThermostat">
+		<Name>Nest Thermostat (NoLongerEvil)</Name>
+		<ConfigUI>
+			<Field id="connectionId" type="menu">
+				<Label>Connection:</Label>
+				<List class="self" method="listConnections" dynamicReload="true"/>
+				<CallbackMethod>configChanged</CallbackMethod>
+			</Field>
+			<Field id="serial" type="menu">
+				<Label>Thermostat:</Label>
+				<List class="self" method="listThermostats" dynamicReload="true"/>
+			</Field>
+			<Field id="refreshList" type="button">
+				<Label/>
+				<Title>Refresh List</Title>
+				<CallbackMethod>configChanged</CallbackMethod>
+			</Field>
+			<Field id="serialHelp" type="label" fontSize="small">
+				<Label>A thermostat appears here once it has connected to the server at least once (reboot it after flashing). Save the connection device first.</Label>
+			</Field>
+
+			<!-- Indigo thermostat capability props; kept in sync from the device's reported capabilities -->
+			<Field id="NumTemperatureInputs" type="textfield" hidden="true" defaultValue="1"/>
+			<Field id="NumHumidityInputs" type="textfield" hidden="true" defaultValue="1"/>
+			<Field id="SupportsHeatSetpoint" type="checkbox" hidden="true" defaultValue="true"/>
+			<Field id="SupportsCoolSetpoint" type="checkbox" hidden="true" defaultValue="false"/>
+			<Field id="SupportsHvacOperationMode" type="checkbox" hidden="true" defaultValue="true"/>
+			<Field id="SupportsHvacFanMode" type="checkbox" hidden="true" defaultValue="false"/>
+			<Field id="ShowCoolHeatEquipmentStateUI" type="checkbox" hidden="true" defaultValue="true"/>
+		</ConfigUI>
+		<States>
+			<State id="thermostatName">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Name on thermostat</TriggerLabel>
+				<ControlPageLabel>Name on thermostat</ControlPageLabel>
+			</State>
+			<State id="online">
+				<ValueType>Boolean</ValueType>
+				<TriggerLabel>Online</TriggerLabel>
+				<ControlPageLabel>Online</ControlPageLabel>
+			</State>
+			<State id="lastSeen">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Last seen</TriggerLabel>
+				<ControlPageLabel>Last seen</ControlPageLabel>
+			</State>
+			<State id="nestMode">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Nest mode</TriggerLabel>
+				<ControlPageLabel>Nest mode</ControlPageLabel>
+			</State>
+			<State id="heatingActive">
+				<ValueType>Boolean</ValueType>
+				<TriggerLabel>Heating active</TriggerLabel>
+				<ControlPageLabel>Heating active</ControlPageLabel>
+			</State>
+			<State id="ecoActive">
+				<ValueType>Boolean</ValueType>
+				<TriggerLabel>Eco active</TriggerLabel>
+				<ControlPageLabel>Eco active</ControlPageLabel>
+			</State>
+			<State id="ecoMode">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Eco mode (raw)</TriggerLabel>
+				<ControlPageLabel>Eco mode (raw)</ControlPageLabel>
+			</State>
+			<State id="ecoTempLow">
+				<ValueType>Number</ValueType>
+				<TriggerLabel>Eco temperature low</TriggerLabel>
+				<ControlPageLabel>Eco temperature low</ControlPageLabel>
+			</State>
+			<State id="ecoTempHigh">
+				<ValueType>Number</ValueType>
+				<TriggerLabel>Eco temperature high</TriggerLabel>
+				<ControlPageLabel>Eco temperature high</ControlPageLabel>
+			</State>
+			<State id="targetTemp">
+				<ValueType>Number</ValueType>
+				<TriggerLabel>Target temperature</TriggerLabel>
+				<ControlPageLabel>Target temperature</ControlPageLabel>
+			</State>
+			<State id="timeToTarget">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Time to target</TriggerLabel>
+				<ControlPageLabel>Time to target</ControlPageLabel>
+			</State>
+			<State id="leaf">
+				<ValueType>Boolean</ValueType>
+				<TriggerLabel>Leaf showing</TriggerLabel>
+				<ControlPageLabel>Leaf showing</ControlPageLabel>
+			</State>
+			<State id="learningMode">
+				<ValueType>Boolean</ValueType>
+				<TriggerLabel>Learning mode</TriggerLabel>
+				<ControlPageLabel>Learning mode</ControlPageLabel>
+			</State>
+			<State id="backplateTemp">
+				<ValueType>Number</ValueType>
+				<TriggerLabel>Backplate temperature</TriggerLabel>
+				<ControlPageLabel>Backplate temperature</ControlPageLabel>
+			</State>
+			<State id="firmware">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Firmware</TriggerLabel>
+				<ControlPageLabel>Firmware</ControlPageLabel>
+			</State>
+			<State id="ipAddress">
+				<ValueType>String</ValueType>
+				<TriggerLabel>IP address</TriggerLabel>
+				<ControlPageLabel>IP address</ControlPageLabel>
+			</State>
+			<State id="macAddress">
+				<ValueType>String</ValueType>
+				<TriggerLabel>MAC address</TriggerLabel>
+				<ControlPageLabel>MAC address</ControlPageLabel>
+			</State>
+			<State id="hotWaterSupported">
+				<ValueType>Boolean</ValueType>
+				<TriggerLabel>Hot water control</TriggerLabel>
+				<ControlPageLabel>Hot water control</ControlPageLabel>
+			</State>
+			<State id="hotWaterMode">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Hot water mode</TriggerLabel>
+				<ControlPageLabel>Hot water mode</ControlPageLabel>
+			</State>
+			<State id="hotWaterActive">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Hot water active (raw)</TriggerLabel>
+				<ControlPageLabel>Hot water active (raw)</ControlPageLabel>
+			</State>
+			<State id="hotWaterBoostActive">
+				<ValueType>Boolean</ValueType>
+				<TriggerLabel>Hot water boost active</TriggerLabel>
+				<ControlPageLabel>Hot water boost active</ControlPageLabel>
+			</State>
+			<State id="hotWaterBoostEnds">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Hot water boost ends</TriggerLabel>
+				<ControlPageLabel>Hot water boost ends</ControlPageLabel>
+			</State>
+			<State id="hotWaterTemp">
+				<ValueType>Number</ValueType>
+				<TriggerLabel>Hot water temperature</TriggerLabel>
+				<ControlPageLabel>Hot water temperature</ControlPageLabel>
+			</State>
+			<State id="hotWaterAwayEnabled">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Hot water in eco (raw)</TriggerLabel>
+				<ControlPageLabel>Hot water in eco (raw)</ControlPageLabel>
+			</State>
+			<State id="hotWaterFields">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Hot water fields reported</TriggerLabel>
+				<ControlPageLabel>Hot water fields reported</ControlPageLabel>
+			</State>
+			<State id="lastUpdate">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Last update</TriggerLabel>
+				<ControlPageLabel>Last update</ControlPageLabel>
+			</State>
+		</States>
+	</Device>
+</Devices>

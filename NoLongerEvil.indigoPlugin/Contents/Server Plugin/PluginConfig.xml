@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<PluginConfig>
+	<Field id="titleLabel" type="label" fontSize="small">
+		<Label>Connections (self-hosted server, embedded server or nolongerevil.com) are set up as "NLE Connection" devices. Then add one "Nest Thermostat" device per thermostat.</Label>
+	</Field>
+	<Field id="sep1" type="separator"/>
+	<Field id="showDebugInfo" type="checkbox" defaultValue="false">
+		<Label>Debug logging:</Label>
+		<Description>Log API calls, events and state changes</Description>
+	</Field>
+	<Field id="sep2" type="separator"/>
+	<Field id="openAfterCapture" type="checkbox" defaultValue="true">
+		<Label>After a capture:</Label>
+		<Description>Show the report in Finder and open the GitHub issue page</Description>
+	</Field>
+</PluginConfig>

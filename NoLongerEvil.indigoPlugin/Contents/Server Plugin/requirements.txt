@@ -1,0 +1,10 @@
+# Used by every connection type
+requests>=2.31
+# Only needed for the embedded server (vendored NoLongerEvil server, MIT)
+aiohttp>=3.9.0
+aiosqlite>=0.19.0
+aiomqtt>=2.0.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+sqlmodel>=0.0.14
+sqlalchemy[asyncio]>=2.0.23

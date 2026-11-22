@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<MenuItems>
+	<MenuItem id="listThermostats">
+		<Name>List Thermostats on All Connections</Name>
+		<CallbackMethod>menuListThermostats</CallbackMethod>
+	</MenuItem>
+	<MenuItem id="dumpDiagnostics">
+		<Name>Log Thermostat Diagnostics...</Name>
+		<CallbackMethod>menuDumpDiagnostics</CallbackMethod>
+		<ButtonTitle>Log</ButtonTitle>
+		<ConfigUI>
+			<Field id="help" type="label" fontSize="small">
+				<Label>Writes the thermostat's full status to the Event Log. Embedded and nolongerevil.com connections also include the raw Nest buckets (useful for finding hot water / Heat Link fields).</Label>
+			</Field>
+			<Field id="targetDevice" type="menu">
+				<Label>Thermostat:</Label>
+				<List class="indigo.devices" filter="self.nestThermostat"/>
+			</Field>
+		</ConfigUI>
+	</MenuItem>
+	<MenuItem id="startCapture">
+		<Name>Start Heat Link / Hot Water Capture...</Name>
+		<CallbackMethod>menuStartCapture</CallbackMethod>
+		<ButtonTitle>Start</ButtonTitle>
+		<ConfigUI>
+			<Field id="help" type="label" fontSize="small">
+				<Label>Records every field the thermostat and Heat Link send while you work the hot water controls on the thermostat (boost on, boost off, schedule, off...). Use "Add Capture Marker" to note what you did and when. At the end a redacted report is saved and a pre-filled GitHub issue opens so you can submit it. Needs an embedded connection, a self-hosted one with its database file set, or nolongerevil.com.</Label>
+			</Field>
+			<Field id="targetDevice" type="menu">
+				<Label>Thermostat:</Label>
+				<List class="indigo.devices" filter="self.nestThermostat"/>
+			</Field>
+			<Field id="minutes" type="textfield" defaultValue="20">
+				<Label>Stop after (minutes):</Label>
+			</Field>
+			<Field id="note" type="textfield" defaultValue="">
+				<Label>Your setup:</Label>
+			</Field>
+			<Field id="noteHelp" type="label" fontSize="small">
+				<Label>e.g. "Gen 2, Heat Link v1, combi boiler, no hot water tank" - included in the report.</Label>
+			</Field>
+		</ConfigUI>
+	</MenuItem>
+	<MenuItem id="captureMarker">
+		<Name>Add Capture Marker...</Name>
+		<CallbackMethod>menuCaptureMarker</CallbackMethod>
+		<ButtonTitle>Add</ButtonTitle>
+		<ConfigUI>
+			<Field id="text" type="textfield" defaultValue="">
+				<Label>What did you just do?</Label>
+			</Field>
+			<Field id="textHelp" type="label" fontSize="small">
+				<Label>e.g. "pressed hot water boost 1 hour" or "set hot water to off".</Label>
+			</Field>
+		</ConfigUI>
+	</MenuItem>
+	<MenuItem id="finishCapture">
+		<Name>Finish Capture and Prepare GitHub Issue</Name>
+		<CallbackMethod>menuFinishCapture</CallbackMethod>
+	</MenuItem>
+	<MenuItem id="cancelCapture">
+		<Name>Cancel Capture</Name>
+		<CallbackMethod>menuCancelCapture</CallbackMethod>
+	</MenuItem>
+	<MenuItem id="refreshAll">
+		<Name>Refresh All Thermostats Now</Name>
+		<CallbackMethod>menuRefreshAll</CallbackMethod>
+	</MenuItem>
+	<MenuItem id="toggleDebug">
+		<Name>Toggle Debug Logging</Name>
+		<CallbackMethod>menuToggleDebug</CallbackMethod>
+	</MenuItem>
+</MenuItems>

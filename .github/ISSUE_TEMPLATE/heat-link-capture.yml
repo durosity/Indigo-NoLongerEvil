@@ -1,0 +1,52 @@
+name: Heat Link / hot water capture
+description: Submit a capture from "Start Heat Link / Hot Water Capture" so UK/EU hot water support can be finished
+title: "[Heat Link capture] "
+labels: ["heat-link-capture"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping! The plugin pre-filled most of this. **Please drag the `heatlink-capture-….json` file into the box at the bottom** – that file is the important part.
+        Serials, IP and MAC addresses, postcodes and account details are replaced before saving, but please skim it before attaching.
+  - type: input
+    id: plugin_version
+    attributes:
+      label: Plugin version
+    validations:
+      required: true
+  - type: dropdown
+    id: connection
+    attributes:
+      label: Connection type
+      options:
+        - embedded
+        - selfhosted
+        - hosted
+    validations:
+      required: true
+  - type: textarea
+    id: setup
+    attributes:
+      label: Your setup
+      description: Thermostat generation, Heat Link version, boiler type (combi / system / regular), hot water tank or not, OpenTherm or relay wiring if known.
+      placeholder: Gen 2, Heat Link v1, system boiler with hot water cylinder, relay wiring
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Capture summary
+      description: Pre-filled by the plugin.
+      render: markdown
+  - type: textarea
+    id: steps
+    attributes:
+      label: What you did during the capture
+      description: The markers are in the file, but anything else that happened is useful (e.g. "boost didn't show on the Heat Link light").
+  - type: textarea
+    id: file
+    attributes:
+      label: Capture file
+      description: Drag the .json file here.
+    validations:
+      required: true

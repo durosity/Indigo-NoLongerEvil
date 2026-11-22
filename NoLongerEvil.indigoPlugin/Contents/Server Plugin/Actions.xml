@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<Actions>
+	<Action id="setEco" deviceFilter="self.nestThermostat">
+		<Name>Set Eco Mode</Name>
+		<CallbackMethod>actionSetEco</CallbackMethod>
+		<ConfigUI>
+			<Field id="ecoState" type="menu" defaultValue="on">
+				<Label>Eco mode:</Label>
+				<List>
+					<Option value="on">On (away)</Option>
+					<Option value="off">Off (home)</Option>
+					<Option value="toggle">Toggle</Option>
+				</List>
+			</Field>
+		</ConfigUI>
+	</Action>
+	<Action id="setEcoTemps" deviceFilter="self.nestThermostat">
+		<Name>Set Eco Temperatures</Name>
+		<CallbackMethod>actionSetEcoTemps</CallbackMethod>
+		<ConfigUI>
+			<Field id="help" type="label" fontSize="small">
+				<Label>Self-hosted and embedded connections only. Leave a field blank to keep its current value. Celsius.</Label>
+			</Field>
+			<Field id="ecoLow" type="textfield">
+				<Label>Eco heat-to (low) °C:</Label>
+			</Field>
+			<Field id="ecoHigh" type="textfield">
+				<Label>Eco cool-to (high) °C:</Label>
+			</Field>
+		</ConfigUI>
+	</Action>
+	<Action id="setRange" deviceFilter="self.nestThermostat">
+		<Name>Set Heat-Cool Range</Name>
+		<CallbackMethod>actionSetRange</CallbackMethod>
+		<ConfigUI>
+			<Field id="help" type="label" fontSize="small">
+				<Label>Only for systems that can both heat and cool. Celsius.</Label>
+			</Field>
+			<Field id="rangeLow" type="textfield" defaultValue="19">
+				<Label>Low °C:</Label>
+			</Field>
+			<Field id="rangeHigh" type="textfield" defaultValue="24">
+				<Label>High °C:</Label>
+			</Field>
+		</ConfigUI>
+	</Action>
+	<Action id="setFanTimer" deviceFilter="self.nestThermostat">
+		<Name>Run Fan Timer</Name>
+		<CallbackMethod>actionSetFanTimer</CallbackMethod>
+		<ConfigUI>
+			<Field id="help" type="label" fontSize="small">
+				<Label>Only for systems with a fan. 0 turns the timer off.</Label>
+			</Field>
+			<Field id="minutes" type="textfield" defaultValue="15">
+				<Label>Minutes:</Label>
+			</Field>
+		</ConfigUI>
+	</Action>
+	<Action id="boostHotWater" deviceFilter="self.nestThermostat">
+		<Name>Boost Hot Water (experimental)</Name>
+		<CallbackMethod>actionBoostHotWater</CallbackMethod>
+		<ConfigUI>
+			<Field id="help" type="label" fontSize="small">
+				<Label>UK/EU Heat Link only, self-hosted and embedded connections. Experimental: built from the protocol docs, not yet confirmed on a real Heat Link - please send a capture if it doesn't work. 0 cancels the boost.</Label>
+			</Field>
+			<Field id="minutes" type="menu" defaultValue="30">
+				<Label>Boost for:</Label>
+				<List>
+					<Option value="0">Cancel boost</Option>
+					<Option value="30">30 minutes</Option>
+					<Option value="60">1 hour</Option>
+					<Option value="90">1½ hours</Option>
+					<Option value="120">2 hours</Option>
+				</List>
+			</Field>
+		</ConfigUI>
+	</Action>
+	<Action id="refresh" deviceFilter="self.nestThermostat">
+		<Name>Refresh Thermostat Now</Name>
+		<CallbackMethod>actionRefresh</CallbackMethod>
+	</Action>
+</Actions>
